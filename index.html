@@ -1179,6 +1179,14 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
  function save(){localStorage.setItem(KEY,JSON.stringify(db)); if(currentId)localStorage.setItem('leanBlendCurrentProfile',currentId);} window.leanBlendSaveProfile=save;
  function blank(){return {name:'',age:null,gender:'',height:null,target:null,currentWeight:null,activity:'general',trainingDays:0,calorieTarget:null,measurements:[],orders:[],foodLog:[],garmin:{source:'Garmin Connect',importedAt:null,days:[]}};}
  function profile(){
+   // Rehydrate from localStorage on every lookup so profiles created/selected by
+   // another handler are immediately visible to the in-memory profile engine.
+   try{
+     const fresh=JSON.parse(localStorage.getItem(KEY)||'{}')||{};
+     const freshId=localStorage.getItem('leanBlendCurrentProfile')||'';
+     if(JSON.stringify(fresh)!==JSON.stringify(db)) db=fresh;
+     if(freshId && freshId!==currentId) currentId=freshId;
+   }catch(e){}
    if(currentId && db[currentId]) return db[currentId];
    const ids=Object.keys(db);
    if(ids.length){
@@ -1442,7 +1450,9 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
         localStorage.setItem('leanBlendCurrentProfile',id);
         if(typeof window.leanBlendRender==='function') window.leanBlendRender();
       }
-      return typeof window.leanBlendProfile==='function'?window.leanBlendProfile():db[id];
+      const resolved=typeof window.leanBlendProfile==='function'?window.leanBlendProfile():db[id];
+      if(resolved && typeof window.leanBlendSaveProfile==='function') window.leanBlendSaveProfile();
+      return resolved;
     }catch(e){return null;}
   }
   function bind(){
@@ -1455,7 +1465,12 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
     btn.dataset.v262Bound='1';
     btn.addEventListener('click',function(){
       const p=getProfile()||syncProfileFromForm();
-      if(!p){alert('Please save your profile before using AI Food Capture.');return;}
+      if(!p){
+        const saveBtn=$('lb-save-profile');
+        if(saveBtn){ saveBtn.click(); }
+      }
+      const resolved=getProfile()||syncProfileFromForm();
+      if(!resolved){alert('Please save your profile before using AI Food Capture.');return;}
       const text=src.value.trim();
       if(!text){alert('Tell LEAN BLEND what you ate first.');return;}
       if(target){
