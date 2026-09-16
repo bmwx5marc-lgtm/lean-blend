@@ -1288,7 +1288,7 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
     $('ai-copy-result')?.addEventListener('click',async()=>{const text=`LEAN BLEND AI — ${r.name}\n\n${(r.ingredients||[]).map(x=>`${x.quantity} ${x.ingredient}`).join('\n')}\n\nMETHOD\n${(r.method||[]).map((x,i)=>`${i+1}. ${x}`).join('\n')}\n\nEstimated: ${b.kcal??'—'} kcal · ${b.protein_g??'—'} g protein · ${b.fibre_g??'—'} g fibre`;await navigator.clipboard?.writeText(text);$('ai-copy-result').textContent='COPIED ✓';setTimeout(()=>$('ai-copy-result').textContent='COPY RECIPE',1200);});
     $('ai-log-result')?.addEventListener('click',()=>{const p=profile();if(!p){return}p.foodLog=p.foodLog||[];p.foodLog.push({date:today(),meal:'Drink',name:r.name||'AI Blend',kcal:Number(b.kcal)||0,protein:Number(b.protein_g)||0,carbs:Number(b.carbs_g)||0,fat:Number(b.fat_g)||0,fibre:Number(b.fibre_g)||0,source:'AI BLEND'});window.leanBlendSaveProfile?.();window.leanBlendRender?.();alert('AI blend logged.');});
   }
-  async function askAI(prompt){if(!aiPrompt||!aiResult)return;const aiProfile=ensureAIProfile(); if(!aiProfile){return}aiAsk.disabled=true;setStatus('ai-result-status','THINKING…');aiResult.innerHTML='<div class="ai-result-empty"><strong>LEAN BLEND AI is thinking…</strong><p>Using your profile, food log, Garmin context and LEAN BLEND data.</p></div>';try{const d=await aiPost('/blend',{prompt,source:'lean-blend-web',version:'26.0',context});renderBlend(d);setStatus('ai-result-status','PERSONALISED');}catch(e){setStatus('ai-result-status','ERROR');aiResult.innerHTML=`<div class="ai-error"><b>AI connection problem.</b><br>${esc(e.message)}</div>`}finally{aiAsk.disabled=false}}
+  async function askAI(prompt){if(!aiPrompt||!aiResult)return;const aiProfile=ensureAIProfile(); if(!aiProfile){return}aiAsk.disabled=true;setStatus('ai-result-status','THINKING…');aiResult.innerHTML='<div class="ai-result-empty"><strong>LEAN BLEND AI is thinking…</strong><p>Using your profile, food log, Garmin context and LEAN BLEND data.</p></div>';try{const d=await aiPost('/blend',{prompt,source:'lean-blend-web',version:'27.4',context:context()});renderBlend(d);setStatus('ai-result-status','PERSONALISED');}catch(e){setStatus('ai-result-status','ERROR');aiResult.innerHTML=`<div class="ai-error"><b>AI connection problem.</b><br>${esc(e.message)}</div>`}finally{aiAsk.disabled=false}}
   aiAsk?.addEventListener('click',()=>askAI(aiPrompt.value.trim()));
   window.leanBlendAIReview=()=>runDailyBrief(true);
   // ---- DAILY INTELLIGENCE ----
@@ -1358,7 +1358,44 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
   let pending=[];
   function meal(){return $('lb-v25-meal')?.value||'Snack';}
   function showFood(d,source){pending=(d.items||[]).map(x=>({date:today(),meal:x.meal||meal(),name:x.name||'Food',kcal:Number(x.kcal)||0,protein:Number(x.protein_g)||0,carbs:Number(x.carbs_g)||0,fat:Number(x.fat_g)||0,fibre:Number(x.fibre_g)||0,source:x.source||source||'AI ESTIMATE',confidence:x.confidence||'MEDIUM'}));$('lb-v25-preview-rows').innerHTML=pending.map((x,i)=>`<tr><td><input data-v26="name" data-i="${i}" value="${esc(x.name)}" style="min-width:150px"></td><td><input data-v26="kcal" data-i="${i}" type="number" value="${x.kcal}" style="width:80px"></td><td><input data-v26="protein" data-i="${i}" type="number" step="0.1" value="${x.protein}" style="width:70px"></td><td><input data-v26="carbs" data-i="${i}" type="number" step="0.1" value="${x.carbs}" style="width:70px"></td><td><input data-v26="fat" data-i="${i}" type="number" step="0.1" value="${x.fat}" style="width:70px"></td><td><input data-v26="fibre" data-i="${i}" type="number" step="0.1" value="${x.fibre}" style="width:70px"></td></tr>`).join('')||'<tr><td colspan="6">No food could be confidently identified.</td></tr>';$('lb-v25-capture-note').textContent='SOURCE: '+pending.map(x=>x.source).join(', ')+' · CONFIDENCE: '+(pending.some(x=>x.confidence==='LOW')?'LOW':pending.some(x=>x.confidence==='MEDIUM')?'MEDIUM':'HIGH');$('lb-v25-preview').hidden=!pending.length;setStatus('lb-v25-status',pending.length?'REVIEW':'NO MATCH');}
-  async function analyseCapture(){const aiProfile=ensureAIProfile(); if(!aiProfile){return}const text=$('lb-v25-text').value.trim();if(!text){alert('Describe the meal first.');return}setStatus('lb-v25-status','ANALYSING…');try{showFood(await aiPost('/food',{prompt:text,meal:meal(),date:today(),context}),'AI ESTIMATE')}catch(e){setStatus('lb-v25-status','ERROR');alert(e.message)}}
+  async function analyseCapture(){
+    const text=$('lb-v25-text')?.value.trim();
+    if(!text){alert('Describe the meal first.');return}
+    const status=$('lb-v25-status');
+    const mealName=meal();
+    if(status)status.textContent='ANALYSING…';
+    const old=$('lb-v27-capture-result'); if(old)old.remove();
+    try{
+      const d=await aiPost('/food',{prompt:text,meal:mealName,date:today(),context:context()});
+      const items=Array.isArray(d.items)?d.items:[];
+      const wrap=document.createElement('div');
+      wrap.id='lb-v27-capture-result';
+      wrap.style.cssText='margin-top:14px;border:1px solid #d8e0d2;border-radius:14px;padding:14px;background:#fafcf9';
+      if(!items.length){
+        wrap.innerHTML='<b>AI COULD NOT IDENTIFY THE FOOD</b><p style="margin:6px 0 0">Try a more specific description or use the nutrition label.</p>';
+        if(status)status.textContent='NO MATCH';
+      }else{
+        const safe=x=>String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+        wrap.innerHTML='<b>AI NUTRITION ESTIMATE</b><div style="margin-top:8px">'+items.map((x,i)=>`<div style="padding:10px 0;border-top:${i?'1px solid #e6ebe3':'0'}"><strong>${safe(x.name||'Food')}</strong><br><span>${Number(x.kcal)||0} kcal · P ${Number(x.protein_g)||0} g · C ${Number(x.carbs_g)||0} g · F ${Number(x.fat_g)||0} g · Fibre ${Number(x.fibre_g)||0} g</span><br><small>${safe(x.source||'AI ESTIMATE')} · confidence ${safe(x.confidence||'MEDIUM')}</small></div>`).join('')+'</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="lb-btn" id="lb-v27-confirm-ai">CONFIRM & LOG</button><button type="button" class="lb-btn alt" id="lb-v27-cancel-ai">CANCEL</button></div>';
+        wrap.dataset.items=JSON.stringify(items);
+        const anchor=$('lb-v25-text')?.parentElement||$('lb-v25-text');
+        anchor?.appendChild(wrap);
+        if(status)status.textContent='REVIEW';
+        $('lb-v27-confirm-ai')?.addEventListener('click',()=>{
+          let p=window.leanBlendProfile?.();
+          if(!p){alert('BIGFISH profile is not available. Please refresh once.');return}
+          p.foodLog=p.foodLog||[];
+          items.forEach(x=>p.foodLog.push({date:today(),meal:x.meal||mealName,name:x.name||'Food',kcal:Number(x.kcal)||0,protein:Number(x.protein_g)||0,carbs:Number(x.carbs_g)||0,fat:Number(x.fat_g)||0,fibre:Number(x.fibre_g)||0,source:x.source||'AI ESTIMATE',confidence:x.confidence||'MEDIUM'}));
+          window.leanBlendSaveProfile?.();window.leanBlendRender?.();wrap.remove();if(status)status.textContent='LOGGED ✓';
+        });
+        $('lb-v27-cancel-ai')?.addEventListener('click',()=>{wrap.remove();if(status)status.textContent='READY';});
+      }
+      if(!wrap.parentElement){const anchor=$('lb-v25-text')?.parentElement||$('lb-v25-text');anchor?.appendChild(wrap)}
+    }catch(e){
+      if(status)status.textContent='ERROR';
+      const wrap=document.createElement('div');wrap.id='lb-v27-capture-result';wrap.style.cssText='margin-top:14px;border:1px solid #e1d0d0;border-radius:14px;padding:14px';wrap.innerHTML='<b>AI CONNECTION ERROR</b><p style="margin:6px 0 0">'+String(e.message||e).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))+'</p>';( $('lb-v25-text')?.parentElement || $('lb-v25-text') )?.appendChild(wrap);
+    }
+  }
   async function analysePhoto(dataUrl){const aiProfile=ensureAIProfile(); if(!aiProfile){return}setStatus('lb-v25-status','READING PHOTO…');try{showFood(await aiPost('/food-photo',{image:dataUrl,meal:meal(),date:today(),context}),'AI VISION ESTIMATE')}catch(e){setStatus('lb-v25-status','ERROR');alert(e.message)}}
   window.leanBlendAnalyseCapture=analyseCapture; $('lb-v25-analyse')?.addEventListener('click',analyseCapture); $('lb-v25-photo')?.addEventListener('click',()=>$('lb-v25-file')?.click());
   document.querySelectorAll('.lb-meal-chip').forEach(chip=>chip.addEventListener('click',()=>{document.querySelectorAll('.lb-meal-chip').forEach(x=>x.classList.remove('active'));chip.classList.add('active');const sel=$('lb-v25-meal');if(sel)sel.value=chip.dataset.meal||'Snack';}));$('lb-v25-file')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=()=>analysePhoto(reader.result);reader.readAsDataURL(f);e.target.value='';});
@@ -1387,7 +1424,7 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
 (function(){
   // V27 unified AI capture: one visible capture surface, one AI pipeline.
   // This marker is intentionally small and has no business logic.
-  document.documentElement.dataset.leanBlendAiVersion='27.2';
+  document.documentElement.dataset.leanBlendAiVersion='27.4';
 })();
 </script>
 <script id="lean-blend-v27-3-capture-guard">
@@ -1400,11 +1437,12 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
     // canonical capture function. Otherwise show a diagnostic instead of silently doing nothing.
     btn.type='button';
     btn.dataset.aiWired='true';
-    btn.addEventListener('click',function(){
+    btn.addEventListener('click',function(ev){
       if(typeof window.leanBlendAnalyseCapture==='function') return;
+      ev.preventDefault();ev.stopImmediatePropagation();
       const status=document.getElementById('lb-v25-status');
       if(status)status.textContent='AI ENGINE NOT LOADED';
-      alert('LEAN BLEND AI engine did not load. Refresh the page once. If this message remains, the deployed GitHub file is not the V27.3 build.');
+      alert('LEAN BLEND AI engine did not load. The deployed page is not running the final V27.4 build.');
     },true);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot); else boot();
