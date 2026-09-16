@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LEAN BLEND — BIGFISH · V25.2 FINAL AI FOOD INTELLIGENCE</title>
+<title>LEAN BLEND — BIGFISH · V25.3 FINAL AI FOOD INTELLIGENCE</title>
 <style>
 :root{--ink:#141513;--muted:#686b63;--paper:#f5f4ef;--line:#dddcd4;--accent:#8ebd70;--dark:#11120f}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#e8e7e0;color:var(--ink);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;line-height:1.5}
@@ -285,13 +285,12 @@ body{overflow-x:hidden}
         <label>GENDER<select id="lb-gender"><option value="">Select…</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other / prefer not to say</option></select></label>
         <label>HEIGHT (CM)<input id="lb-height" type="number" step="0.1"></label>
         <label>TARGET WEIGHT (KG)<input id="lb-target" type="number" step="0.1"></label>
-        <label>CURRENT WEIGHT (KG)<input id="lb-current-weight-input" type="number" min="0.1" step="0.1" placeholder="e.g. 105.4"></label>
         <label>ACTIVITY<select id="lb-activity"><option value="general">General / light activity</option><option value="active">Regular exercise</option><option value="muscle">Muscle gain / resistance training</option><option value="fatloss">Fat loss + resistance training</option></select></label>
         <label>TRAINING DAYS / WEEK<input id="lb-training-days" type="number" min="0" max="7" step="1" placeholder="e.g. 4"></label>
         <label>DAILY CALORIE TARGET (OPTIONAL)<input id="lb-calorie-target" type="number" min="0" step="10" placeholder="AI can estimate"></label>
         <label class="lb-full">CREATE / SAVE PROFILE<div class="lb-actions"><button class="lb-btn" id="lb-save-profile">SAVE PROFILE</button><button class="lb-btn alt" id="lb-new-profile">NEW PROFILE</button><button class="lb-btn alt" id="lb-delete-profile">DELETE</button></div></label>
       </div>
-      <p class="lb-note" style="margin-top:14px">Current weight is your latest weight. Saving the profile records it as today's measurement. Use ADD MEASUREMENT below when you want to enter a dated weigh-in with body fat or water.</p>
+      <p class="lb-note" style="margin-top:14px">Height and target weight are profile settings. Add a measurement whenever you weigh in; the app builds the progression chart automatically.</p>
     </div>
     <div class="lb-card">
       <div class="lb-profile-pill" id="lb-current-profile">NO PROFILE SELECTED</div>
@@ -1639,10 +1638,10 @@ render();
  const $=id=>document.getElementById(id);
  const today=new Date().toISOString().slice(0,10); $('lb-measure-date').value=today; $('lb-order-date').value=today; $('lb-food-date').value=today;
  function save(){localStorage.setItem(KEY,JSON.stringify(db)); if(currentId)localStorage.setItem('leanBlendCurrentProfile',currentId);} window.leanBlendSaveProfile=save;
- function blank(){return {name:'',age:null,gender:'',height:null,target:null,currentWeight:null,activity:'general',trainingDays:0,calorieTarget:null,measurements:[],orders:[],foodLog:[],garmin:{source:'Garmin Connect',importedAt:null,days:[]}};}
+ function blank(){return {name:'',age:null,gender:'',height:null,target:null,activity:'general',trainingDays:0,calorieTarget:null,measurements:[],orders:[],foodLog:[],garmin:{source:'Garmin Connect',importedAt:null,days:[]}};}
  function profile(){return db[currentId]||null;}
  function refreshSelect(){const sel=$('lb-user-select'); sel.innerHTML='<option value="">Select profile…</option>'+Object.entries(db).map(([id,p])=>'<option value="'+id+'">'+esc(p.name||'Unnamed')+'</option>').join(''); sel.value=currentId||'';}
- function setCurrent(id){currentId=id; save(); const p=profile(); if(p&&!p.garmin)p.garmin={source:'Garmin Connect',importedAt:null,days:[]}; $('lb-current-profile').textContent=p?(p.name||'UNNAMED PROFILE').toUpperCase():'NO PROFILE SELECTED'; $('lb-user-name').value=p?.name||''; $('lb-age').value=p?.age??''; $('lb-gender').value=p?.gender||''; $('lb-height').value=p?.height??''; $('lb-target').value=p?.target??''; $('lb-current-weight-input').value=p?.currentWeight??(latest(p)?.weight??''); $('lb-activity').value=p?.activity||'general'; $('lb-training-days').value=p?.trainingDays??0; $('lb-calorie-target').value=p?.calorieTarget??''; render();}
+ function setCurrent(id){currentId=id; save(); const p=profile(); if(p&&!p.garmin)p.garmin={source:'Garmin Connect',importedAt:null,days:[]}; $('lb-current-profile').textContent=p?(p.name||'UNNAMED PROFILE').toUpperCase():'NO PROFILE SELECTED'; $('lb-user-name').value=p?.name||''; $('lb-age').value=p?.age??''; $('lb-gender').value=p?.gender||''; $('lb-height').value=p?.height??''; $('lb-target').value=p?.target??''; $('lb-activity').value=p?.activity||'general'; $('lb-training-days').value=p?.trainingDays??0; $('lb-calorie-target').value=p?.calorieTarget??''; render();}
  function esc(x){return String(x??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
  function latest(p){return p&&p.measurements.length?[...p.measurements].sort((a,b)=>a.date.localeCompare(b.date)).at(-1):null;}
  function renderChart(p){const svg=$('lb-weight-chart'); const ms=[...(p?.measurements||[])].sort((a,b)=>a.date.localeCompare(b.date)); if(!ms.length){svg.innerHTML='<text x="380" y="135" text-anchor="middle" fill="#777">Add measurements to see your progression</text>';return;} const W=760,H=260,pad=38; const vals=ms.map(x=>Number(x.weight)).filter(Number.isFinite); const target=Number(p.target); const min=Math.min(...vals,Number.isFinite(target)?target:Infinity); const max=Math.max(...vals,Number.isFinite(target)?target:-Infinity); const lo=Math.floor((min-2)*2)/2, hi=Math.ceil((max+2)*2)/2; const x=i=>pad+(W-pad*2)*(ms.length===1?.5:i/(ms.length-1)); const y=v=>H-pad-(v-lo)/(hi-lo)*(H-pad*2); let out='<line x1="38" y1="222" x2="722" y2="222" stroke="#cfd5cb"/><line x1="38" y1="38" x2="38" y2="222" stroke="#cfd5cb"/>'; if(Number.isFinite(target)){out+='<line x1="38" y1="'+y(target)+'" x2="722" y2="'+y(target)+'" stroke="#8ebd70" stroke-dasharray="6 5"/><text x="45" y="'+(y(target)-7)+'" font-size="11" fill="#5d8f49">Target '+target.toFixed(1)+' kg</text>';} const pts=ms.map((m,i)=>x(i)+','+y(Number(m.weight))).join(' '); out+='<polyline points="'+pts+'" fill="none" stroke="#171914" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'; ms.forEach((m,i)=>{out+='<circle cx="'+x(i)+'" cy="'+y(Number(m.weight))+'" r="4" fill="#171914"/><text x="'+x(i)+'" y="245" text-anchor="middle" font-size="9" fill="#686b63">'+esc(m.date.slice(5))+'</text>';}); svg.innerHTML=out;}
@@ -1654,7 +1653,7 @@ render();
  function updateDashboard(p){const ms=[...(p?.measurements||[])].filter(m=>Number.isFinite(Number(m.weight))).sort((a,b)=>a.date.localeCompare(b.date));const start=ms[0]?Number(ms[0].weight):null,current=ms.at(-1)?Number(ms.at(-1).weight):null,target=Number(p?.target),lost=start!=null&&current!=null?start-current:null;let progress=null;if(start!=null&&current!=null&&Number.isFinite(target)&&start!==target)progress=((start-current)/(start-target))*100;const orders=p?.orders||[],spend=orders.reduce((sum,o)=>sum+Number(o.amount||0),0);$('lb-start-weight').textContent=start!=null?start.toFixed(1)+' kg':'—';$('lb-kg-lost').textContent=lost!=null?(lost>=0?lost.toFixed(1)+' kg':'+'+Math.abs(lost).toFixed(1)+' kg'):'—';$('lb-target-progress').textContent=progress!=null?Math.max(0,Math.min(100,progress)).toFixed(0)+'%':'—';$('lb-target-progress-label').textContent=progress!=null?Math.max(0,Math.min(100,progress)).toFixed(0)+'%':'—';$('lb-target-progress-bar').style.width=progress!=null?Math.max(0,Math.min(100,progress))+'%':'0%';$('lb-measure-count').textContent=ms.length;$('lb-dashboard-orders').textContent=orders.length;$('lb-dashboard-spend').textContent='R'+spend.toFixed(2);}
  $('lb-user-select').addEventListener('change',e=>setCurrent(e.target.value));
  $('lb-new-profile').addEventListener('click',()=>{const id='u_'+Date.now();db[id]=blank();currentId=id;save();refreshSelect();setCurrent(id);$('lb-user-name').focus();});
- $('lb-save-profile').addEventListener('click',()=>{if(!currentId){const id='u_'+Date.now();db[id]=blank();currentId=id;}const p=db[currentId];p.name=$('lb-user-name').value.trim()||'Unnamed';p.age=$('lb-age').value?Number($('lb-age').value):null;p.gender=$('lb-gender').value||'';p.height=$('lb-height').value?Number($('lb-height').value):null;p.target=$('lb-target').value?Number($('lb-target').value):null;const currentWeight=$('lb-current-weight-input').value?Number($('lb-current-weight-input').value):NaN;if(Number.isFinite(currentWeight)&&currentWeight>0){p.currentWeight=currentWeight;const existing=(p.measurements||[]).find(m=>m.date===today);if(existing)existing.weight=currentWeight;else p.measurements.push({date:today,weight:currentWeight,fat:'',water:''});}else if($('lb-current-weight-input').value===''){p.currentWeight=null;}p.activity=$('lb-activity').value||'general';p.trainingDays=$('lb-training-days').value?Number($('lb-training-days').value):0;p.calorieTarget=$('lb-calorie-target').value?Number($('lb-calorie-target').value):null;save();render();});
+ $('lb-save-profile').addEventListener('click',()=>{if(!currentId){const id='u_'+Date.now();db[id]=blank();currentId=id;}const p=db[currentId];p.name=$('lb-user-name').value.trim()||'Unnamed';p.age=$('lb-age').value?Number($('lb-age').value):null;p.gender=$('lb-gender').value||'';p.height=$('lb-height').value?Number($('lb-height').value):null;p.target=$('lb-target').value?Number($('lb-target').value):null;p.activity=$('lb-activity').value||'general';p.trainingDays=$('lb-training-days').value?Number($('lb-training-days').value):0;p.calorieTarget=$('lb-calorie-target').value?Number($('lb-calorie-target').value):null;save();render();});
  $('lb-delete-profile').addEventListener('click',()=>{if(!currentId)return;if(confirm('Delete this profile and its measurements, food log and order history?')){delete db[currentId];currentId='';save();render();}});
  $('lb-add-measure').addEventListener('click',()=>{const p=profile();if(!p){alert('Create or select a profile first.');return;}const weight=Number($('lb-measure-weight').value);if(!Number.isFinite(weight)||weight<=0){alert('Enter a valid weight.');return;}p.measurements.push({date:$('lb-measure-date').value||today,weight,fat:$('lb-measure-fat').value===''?'':Number($('lb-measure-fat').value),water:$('lb-measure-water').value===''?'':Number($('lb-measure-water').value)});save();$('lb-measure-weight').value='';$('lb-measure-fat').value='';$('lb-measure-water').value='';render();});
  $('lb-add-order').addEventListener('click',()=>{const p=profile();if(!p){alert('Create or select a profile first.');return;}const amount=Number($('lb-order-amount').value);if(!Number.isFinite(amount)||amount<0){alert('Enter the amount spent.');return;}p.orders.push({date:$('lb-order-date').value||today,shop:$('lb-order-shop').value.trim()||'Other',amount,note:$('lb-order-note').value.trim()});save();$('lb-order-amount').value='';$('lb-order-note').value='';render();});
@@ -1665,7 +1664,7 @@ render();
  document.getElementById('lb-export-data').addEventListener('click',()=>{const payload={format:'LEAN_BLEND_PROFILE_BACKUP_V3',exportedAt:new Date().toISOString(),profiles:db,currentProfileId:currentId};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='LEAN_BLEND_backup_'+today+'.json';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);});
  document.getElementById('lb-import-data').addEventListener('click',()=>document.getElementById('lb-import-file').click());
  document.getElementById('lb-import-file').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!data||!['LEAN_BLEND_PROFILE_BACKUP_V1','LEAN_BLEND_PROFILE_BACKUP_V2','LEAN_BLEND_PROFILE_BACKUP_V3'].includes(data.format)||!data.profiles||typeof data.profiles!=='object')throw new Error('Invalid backup');if(!confirm('Import this backup? Existing LEAN BLEND profiles on this device will be replaced.'))return;db=data.profiles;Object.values(db).forEach(p=>{if(!Array.isArray(p.foodLog))p.foodLog=[];if(!Array.isArray(p.measurements))p.measurements=[];if(!Array.isArray(p.orders))p.orders=[];});currentId=data.currentProfileId&&db[data.currentProfileId]?data.currentProfileId:(Object.keys(db)[0]||'');save();render();alert('LEAN BLEND data restored successfully.');}catch(err){alert('Could not import this file. Please select a valid LEAN BLEND backup.');}e.target.value='';});
- Object.values(db).forEach(p=>{if(!('currentWeight' in p))p.currentWeight=null;if(p.age==null)p.age=null;if(!p.gender)p.gender='';if(!p.activity)p.activity='general';if(!Number.isFinite(Number(p.trainingDays)))p.trainingDays=0;if(!Array.isArray(p.foodLog))p.foodLog=[];if(!Array.isArray(p.measurements))p.measurements=[];if(!Array.isArray(p.orders))p.orders=[];if(!p.garmin)p.garmin={source:'Garmin Connect',importedAt:null,days:[]};});if(currentId&&!db[currentId])currentId='';if(!currentId&&Object.keys(db).length)currentId=Object.keys(db)[0];render();
+ Object.values(db).forEach(p=>{if(p.age==null)p.age=null;if(!p.gender)p.gender='';if(!p.activity)p.activity='general';if(!Number.isFinite(Number(p.trainingDays)))p.trainingDays=0;if(!Array.isArray(p.foodLog))p.foodLog=[];if(!Array.isArray(p.measurements))p.measurements=[];if(!Array.isArray(p.orders))p.orders=[];if(!p.garmin)p.garmin={source:'Garmin Connect',importedAt:null,days:[]};});if(currentId&&!db[currentId])currentId='';if(!currentId&&Object.keys(db).length)currentId=Object.keys(db)[0];render();
  window.leanBlendProfile=profile; window.leanBlendTargets=()=>targets(profile()); window.leanBlendFoodToday=()=>dayFoods(profile()); window.leanBlendRender=render;
 })();
 </script>
@@ -1742,9 +1741,7 @@ render();
 (function(){
  const $=id=>document.getElementById(id);
  const KEY='leanBlendAIEndpoint';const endpointEl=document.getElementById('ai-endpoint'),config=document.getElementById('ai-config'),result=document.getElementById('ai-result'),status=document.getElementById('ai-result-status'),promptEl=document.getElementById('ai-prompt'),ask=document.getElementById('ai-ask');
-  const DEFAULT_AI_ENDPOINT='https://lean-blend-ai.fdtv2wdbmj.workers.dev';
- if(endpointEl)endpointEl.value=localStorage.getItem(KEY)||DEFAULT_AI_ENDPOINT;
-  if(!localStorage.getItem(KEY))localStorage.setItem(KEY,DEFAULT_AI_ENDPOINT);
+ if(endpointEl)endpointEl.value=localStorage.getItem(KEY)||'';
  function showConfig(){config.hidden=!config.hidden;if(!config.hidden)endpointEl.focus()}document.getElementById('ai-settings')?.addEventListener('click',showConfig);
  document.getElementById('ai-save-endpoint')?.addEventListener('click',()=>{const v=endpointEl.value.trim().replace(/\/$/,'');if(!v)return;localStorage.setItem(KEY,v);config.hidden=true;status.textContent='CONNECTED';});
  document.querySelectorAll('[data-ai-prompt]').forEach(b=>b.addEventListener('click',()=>{promptEl.value=b.dataset.aiPrompt;promptEl.focus();}));
@@ -1769,11 +1766,11 @@ METHOD\n${(r.method||[]).map((x,i)=>`${i+1}. ${x}`).join('\n')}
 Estimated: ${b.kcal??'—'} kcal · ${b.protein_g??'—'} g protein · ${b.fibre_g??'—'} g fibre`;navigator.clipboard?.writeText(text).then(()=>{const el=document.getElementById('ai-copy-result');el.textContent='COPIED ✓';setTimeout(()=>el.textContent='COPY RECIPE',1200)})});
  document.getElementById('ai-log-result')?.addEventListener('click',()=>{const p=window.leanBlendProfile?.();if(!p){alert('Create a profile first.');return;}p.foodLog=p.foodLog||[];p.foodLog.push({date:new Date().toISOString().slice(0,10),meal:'Drink',name:r.name||'AI Blend',kcal:Number(b.kcal)||0,protein:Number(b.protein_g)||0,carbs:Number(b.carbs_g)||0,fat:Number(b.fat_g)||0,fibre:Number(b.fibre_g)||0});localStorage.setItem('leanBlendProfilesV1',JSON.stringify(JSON.parse(localStorage.getItem('leanBlendProfilesV1')||'{}')));alert('AI blend logged. Open MY PROFILE → FOOD INTAKE to see the updated day.');location.reload()});}
 
- async function aiPost(path,payload){const ep=(localStorage.getItem(KEY)||DEFAULT_AI_ENDPOINT).replace(/\/$/,'');if(!ep){config.hidden=false;status.textContent='SETUP REQUIRED';endpointEl.focus();throw new Error('AI endpoint is not configured.');}const res=await fetch(ep+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await res.json();if(!res.ok)throw new Error(data.error||'AI request failed');return data;}
+ async function aiPost(path,payload){const ep=(localStorage.getItem(KEY)||'').replace(/\/$/,'');if(!ep){config.hidden=false;status.textContent='SETUP REQUIRED';endpointEl.focus();throw new Error('AI endpoint is not configured.');}const res=await fetch(ep+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await res.json();if(!res.ok)throw new Error(data.error||'AI request failed');return data;}
  function updateFoodIntelligence(){const p=window.leanBlendProfile?.();const t=window.leanBlendTargets?.();const foods=window.leanBlendFoodToday?.()||[];const sums=foods.reduce((a,x)=>{a.kcal+=Number(x.kcal)||0;a.protein+=Number(x.protein)||0;a.fibre+=Number(x.fibre)||0;return a},{kcal:0,protein:0,fibre:0});const targets={kcal:Number(t?.calories)||0,protein:Number(t?.protein)||0,fibre:30};[['kcal',sums.kcal,targets.kcal,'lb-bar-kcal','lb-bar-kcal-text','lb-rem-kcal'],['protein',sums.protein,targets.protein,'lb-bar-protein','lb-bar-protein-text','lb-rem-protein'],['fibre',sums.fibre,targets.fibre,'lb-bar-fibre','lb-bar-fibre-text','lb-rem-fibre']].forEach(([k,v,target,bar,txt,rem])=>{const pct=target>0?Math.min(100,v/target*100):0;const b=$(bar);if(b)b.style.width=pct+'%';const tx=$(txt);if(tx)tx.textContent=target?Math.round(v)+' / '+Math.round(target):'—';const rr=$(rem);if(rr)rr.textContent=target?Math.max(0,target-v).toFixed(k==='kcal'?0:1)+(k==='kcal'?' kcal':' g'):'—';});let score=0;if(targets.kcal)score+=Math.min(100,sums.kcal/targets.kcal*100)*.25;if(targets.protein)score+=Math.min(100,sums.protein/targets.protein*100)*.45;score+=Math.min(100,sums.fibre/30*100)*.30;score=Math.round(score);$('lb-food-score').textContent=foods.length?score:'—';$('lb-food-score-ring').style.setProperty('--score',(foods.length?score:0)+'%');$('lb-food-score-copy').textContent=foods.length?(score>=85?'Strong coverage. Keep the next meal balanced and avoid chasing numbers.':score>=65?'Good start. The biggest opportunity is shown below.':'Your log is still building. AI will prioritise the largest nutrition gap.'):'Add your profile and food intake to generate a practical daily score.';const next=targets.protein&&sums.protein<targets.protein*.75?'protein':targets.fibre&&sums.fibre<15?'fibre':targets.kcal&&sums.kcal<targets.kcal*.6?'energy':'overall balance';$('lb-next-food').textContent=foods.length?'Current priority: '+next+'. Ask AI to choose the next meal using your remaining targets and today\s intake.':'AI will identify the biggest nutrition gap after your intake is logged.';}
  async function aiLogNaturalFood(){const text=$('lb-ai-food-capture')?.value.trim();if(!text)return;const p=window.leanBlendProfile?.();if(!p){alert('Create or select a profile first.');return;}const meal=document.querySelector('.lb-meal-chip.active')?.dataset.meal||'Snack';const st=$('lb-food-intel-status');st.textContent='ANALYSING…';try{const d=await aiPost('/food',{prompt:text,meal,date:new Date().toISOString().slice(0,10),context:context()});p.foodLog=p.foodLog||[];(d.items||[]).forEach(x=>p.foodLog.push({date:new Date().toISOString().slice(0,10),meal:x.meal||meal,name:x.name,kcal:Number(x.kcal)||0,protein:Number(x.protein_g)||0,carbs:Number(x.carbs_g)||0,fat:Number(x.fat_g)||0,fibre:Number(x.fibre_g)||0,source:x.source||'AI ESTIMATE'}));localStorage.setItem('leanBlendProfilesV1',JSON.stringify(JSON.parse(localStorage.getItem('leanBlendProfilesV1')||'{}')));$('lb-ai-food-capture').value='';st.textContent='LOGGED ✓';render();setTimeout(()=>st.textContent='READY',1200);}catch(e){st.textContent='ERROR';alert(e.message)}}
  document.querySelectorAll('.lb-meal-chip').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.lb-meal-chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');}));document.getElementById('lb-ai-log-food')?.addEventListener('click',aiLogNaturalFood);document.getElementById('lb-ai-next-meal')?.addEventListener('click',()=>runAI('Based on my profile and everything I have logged today, choose the single best next meal or snack. State my remaining calorie, protein and fibre needs, then give a practical food-based recommendation that complements today rather than repeating it.'));document.getElementById('lb-ai-day-plan')?.addEventListener('click',()=>runAI('Build a practical remainder-of-day food plan based on my profile and everything logged today. Give breakfast/lunch/dinner/snack style options only for meals still ahead, with estimated calories and protein, and keep the plan realistic for home eating.'));updateFoodIntelligence();
- async function runAI(userPrompt){const ep=(localStorage.getItem(KEY)||DEFAULT_AI_ENDPOINT).replace(/\/$/,'');if(!ep){config.hidden=false;status.textContent='SETUP REQUIRED';endpointEl.focus();return;}if(!userPrompt){promptEl.focus();return;}ask.disabled=true;status.textContent='THINKING…';result.innerHTML='<div class="ai-result-empty"><strong>LEAN BLEND AI is thinking…</strong><p>Using your profile, food intake, LEAN BLEND data and external research where needed.</p></div>';try{const res=await fetch(ep+'/blend',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:userPrompt,source:'lean-blend-web',version:'18.2',context:context()})});const data=await res.json();if(!res.ok)throw new Error(data.error||'AI request failed');render(data);status.textContent='PERSONALISED';}catch(e){status.textContent='ERROR';result.innerHTML=`<div class="ai-error"><b>AI connection problem.</b><br>${esc(e.message)}<br><br>Open SETUP and confirm the endpoint is correct.</div>`}finally{ask.disabled=false;}}
+ async function runAI(userPrompt){const ep=(localStorage.getItem(KEY)||'').replace(/\/$/,'');if(!ep){config.hidden=false;status.textContent='SETUP REQUIRED';endpointEl.focus();return;}if(!userPrompt){promptEl.focus();return;}ask.disabled=true;status.textContent='THINKING…';result.innerHTML='<div class="ai-result-empty"><strong>LEAN BLEND AI is thinking…</strong><p>Using your profile, food intake, LEAN BLEND data and external research where needed.</p></div>';try{const res=await fetch(ep+'/blend',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:userPrompt,source:'lean-blend-web',version:'18.2',context:context()})});const data=await res.json();if(!res.ok)throw new Error(data.error||'AI request failed');render(data);status.textContent='PERSONALISED';}catch(e){status.textContent='ERROR';result.innerHTML=`<div class="ai-error"><b>AI connection problem.</b><br>${esc(e.message)}<br><br>Open SETUP and confirm the endpoint is correct.</div>`}finally{ask.disabled=false;}}
  ask?.addEventListener('click',()=>runAI(promptEl.value.trim()));window.leanBlendAIReview=()=>runAI('Review my food intake today against my personal nutrition targets. Calculate what I have consumed, what remains, identify the biggest gap, and recommend what I should eat next. Keep recommendations practical and food-based.');
  // V24 AI SHOPPING & HOME FOOD SYSTEM
  function allFoodForPeriod(p,days){const cutoff=new Date(Date.now()-((days-1)*86400000));return (p?.foodLog||[]).filter(x=>{const d=new Date((x.date||'')+'T12:00:00');return !isNaN(d)&&d>=cutoff;});}
@@ -1823,7 +1820,7 @@ Estimated: ${b.kcal??'—'} kcal · ${b.protein_g??'—'} g protein · ${b.fibre
  $('lb-hf-copy')?.addEventListener('click',async()=>{if(!shopping.length)buildLocal(); if(!shopping.length)return; await navigator.clipboard?.writeText(text());$('lb-home-food-status').textContent='COPIED ✓';setTimeout(()=>$('lb-home-food-status').textContent='READY',1200)});
  $('lb-hf-save')?.addEventListener('click',()=>{const p=window.leanBlendProfile?.();if(!p){alert('Create or select a profile first.');return} if(!shopping.length&&!buildLocal())return; const cost=shopping.reduce((a,x)=>a+(x.cost||0),0);p.orders=p.orders||[];p.orders.push({date:new Date().toISOString().slice(0,10),shop:'LEAN BLEND HOME FOOD PLAN',amount:Math.round(cost*100)/100,note:'V24 master shopping list'}); window.leanBlendSaveProfile?.(); $('lb-home-food-status').textContent='SAVED ✓';setTimeout(()=>$('lb-home-food-status').textContent='READY',1200)});
 })();
-</script><script>window.leanBlendAIPost=window.leanBlendAIPost||async function(path,payload){const ep=localStorage.getItem('leanBlendAIEndpoint')||'https://lean-blend-ai.fdtv2wdbmj.workers.dev';const r=await fetch(ep.replace(/\/$/,'')+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const d=await r.json();if(!r.ok)throw new Error(d.error||'AI request failed');return d};window.leanBlendContext=window.leanBlendContext||function(){const p=window.leanBlendProfile?.();return {profile:p,targets:window.leanBlendTargets?.(),food_today:window.leanBlendFoodToday?.()||[]};};</script><script id="lean-blend-v25-ai-food-capture">
+</script><script>window.leanBlendAIPost=window.leanBlendAIPost||async function(path,payload){const ep=localStorage.getItem('leanBlendAIEndpoint');if(!ep)throw new Error('AI endpoint not configured. Open AI BLEND → SETUP.');const r=await fetch(ep.replace(/\/$/,'')+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const d=await r.json();if(!r.ok)throw new Error(d.error||'AI request failed');return d};window.leanBlendContext=window.leanBlendContext||function(){const p=window.leanBlendProfile?.();return {profile:p,targets:window.leanBlendTargets?.(),food_today:window.leanBlendFoodToday?.()||[]};};</script><script id="lean-blend-v25-ai-food-capture">
 (function(){
  const $=id=>document.getElementById(id); let pending=[];
  function profile(){return window.leanBlendProfile?.();}
@@ -1840,6 +1837,80 @@ Estimated: ${b.kcal??'—'} kcal · ${b.protein_g??'—'} g protein · ${b.fibre
  $('lb-v25-preview-rows')?.addEventListener('input',e=>{const el=e.target;if(!el.dataset.v25)return;const i=Number(el.dataset.i),k=el.dataset.v25;if(pending[i])pending[i][k]=k==='name'?el.value:Number(el.value)||0});
  $('lb-v25-confirm')?.addEventListener('click',()=>{const p=profile();if(!p||!pending.length)return;pending.forEach(x=>p.foodLog.push(x));window.leanBlendSaveProfile?.();$('lb-v25-preview').hidden=true;$('lb-v25-status').textContent='LOGGED ✓';$('lb-v25-text').value='';window.leanBlendRender?.();setTimeout(()=>$('lb-v25-status').textContent='READY',1500);});
  $('lb-v25-cancel')?.addEventListener('click',()=>{pending=[];$('lb-v25-preview').hidden=true;$('lb-v25-status').textContent='READY';});
+})();
+</script>
+<!-- LEAN BLEND V25.3 PROFILE + AI REPAIR PATCH -->
+<script id="lean-blend-v25-3-repair">
+(function(){
+  const DB_KEY='leanBlendProfilesV1';
+  const CUR_KEY='leanBlendCurrentProfile';
+  const AI_KEY='leanBlendAIEndpoint';
+  const DEFAULT_AI='https://lean-blend-ai.fdtv2wdbmj.workers.dev';
+
+  function readDB(){
+    try{return JSON.parse(localStorage.getItem(DB_KEY)||'{}')||{};}catch(e){return {};}
+  }
+  function activeId(db){
+    let id=localStorage.getItem(CUR_KEY)||'';
+    if(!id || !db[id]){
+      const ids=Object.keys(db);
+      const recovered=ids[0]||'';
+      if(recovered && recovered!==id){
+        localStorage.setItem(CUR_KEY,recovered);
+        // Let the original profile engine reopen with the recovered ID.
+        if(!sessionStorage.getItem('leanBlendProfileRepairReloaded')){
+          sessionStorage.setItem('leanBlendProfileRepairReloaded','1');
+          location.reload();
+          return recovered;
+        }
+      }
+      id=recovered;
+    }
+    return id;
+  }
+  function activeProfile(){
+    const db=readDB();
+    const id=activeId(db);
+    return id && db[id] ? db[id] : null;
+  }
+
+  // Recover the selected profile if the saved profile ID was lost/stale.
+  window.leanBlendProfile=function(){
+    return activeProfile();
+  };
+
+  // Make every save operation persist the currently selected profile reliably.
+  window.leanBlendSaveProfile=function(){
+    const db=readDB();
+    let id=activeId(db);
+    if(!id){
+      const name=(document.getElementById('lb-user-name')?.value||'').trim();
+      if(!name) return false;
+      id='u_'+Date.now();
+      db[id]={name:name,age:null,gender:'',height:null,target:null,activity:'general',trainingDays:0,calorieTarget:null,measurements:[],orders:[],foodLog:[],garmin:{source:'Garmin Connect',importedAt:null,days:[]}};
+      localStorage.setItem(CUR_KEY,id);
+    }
+    localStorage.setItem(DB_KEY,JSON.stringify(db));
+    localStorage.setItem(CUR_KEY,id);
+    return true;
+  };
+
+  // Keep AI capture usable after a browser/local-storage reset.
+  if(!localStorage.getItem(AI_KEY)) localStorage.setItem(AI_KEY,DEFAULT_AI);
+
+  // If a profile already exists, restore it as the active profile immediately.
+  const p=activeProfile();
+  if(p){
+    try{window.leanBlendRender?.();}catch(e){}
+  }
+
+  // Re-check after the page's existing profile script has finished initialising.
+  setTimeout(function(){
+    const p2=activeProfile();
+    if(p2){
+      try{window.leanBlendRender?.();}catch(e){}
+    }
+  },100);
 })();
 </script>
 </body></html>
