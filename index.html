@@ -266,7 +266,7 @@ body{overflow-x:hidden}
 </div>
 </div>
 </div>
-<div class="lb-card lb-ai-os">
+<div class="lb-card lb-ai-os" id="food-capture-25">
 <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
 <div><h3 style="margin:0">LEAN BLEND AI NUTRITION OS</h3><p class="lb-note" style="margin:5px 0 0">Your food diary is now part of the intelligence layer. Log meals naturally, see what remains, and let AI decide what would best complete the day.</p></div>
 <span class="lb-status" id="lb-food-intel-status">READY</span>
@@ -274,9 +274,14 @@ body{overflow-x:hidden}
 <div class="lb-ai-os-grid" style="margin-top:14px">
 <div class="lb-ai-panel">
 <h4>AI FOOD CAPTURE</h4>
-<div class="lb-ai-capture"><textarea id="lb-ai-food-capture" placeholder="Tell me what you ate: e.g. 2 eggs, 2 slices wholewheat toast and a cappuccino"></textarea><button class="lb-btn" id="lb-ai-log-food">ANALYSE &amp; LOG</button></div>
-<div class="lb-meal-chips"><button class="lb-meal-chip" data-meal="Breakfast">BREAKFAST</button><button class="lb-meal-chip" data-meal="Lunch">LUNCH</button><button class="lb-meal-chip" data-meal="Dinner">DINNER</button><button class="lb-meal-chip" data-meal="Snack">SNACK</button><button class="lb-meal-chip" data-meal="Drink">DRINK</button></div>
-<p class="lb-ai-mini">AI will estimate calories and macros when exact label information is not supplied. For packaged foods, the nutrition panel remains the preferred source.</p>
+<div class="lb-fields">
+<label>MEAL<select id="lb-v25-meal"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option><option>Drink</option></select></label>
+</div>
+<textarea class="lb-ai-capture" id="lb-v25-text" placeholder="Tell me what you ate: e.g. 2 boiled eggs, wholewheat toast and a cappuccino" style="width:100%;min-height:110px;box-sizing:border-box"></textarea>
+<div class="lb-actions" style="margin-top:10px"><button class="lb-btn" id="lb-v25-voice">🎙 VOICE</button><button class="lb-btn" id="lb-v25-analyse">ANALYSE WITH AI</button><button class="lb-btn alt" id="lb-v25-photo">📷 PHOTO</button><input accept="image/*" capture="environment" hidden="" id="lb-v25-file" type="file"/></div>
+<div class="lb-meal-chips" style="margin-top:10px"><button class="lb-meal-chip active" data-meal="Breakfast">BREAKFAST</button><button class="lb-meal-chip" data-meal="Lunch">LUNCH</button><button class="lb-meal-chip" data-meal="Dinner">DINNER</button><button class="lb-meal-chip" data-meal="Snack">SNACK</button><button class="lb-meal-chip" data-meal="Drink">DRINK</button></div>
+<p class="lb-ai-mini">AI estimates nutrition when exact label information is not supplied. Packaged-food labels remain the preferred source.</p>
+<span class="lb-status" id="lb-v25-status">READY</span>
 </div>
 <div class="lb-ai-panel">
 <h4>TODAY'S NUTRITION SCORE</h4>
@@ -292,33 +297,6 @@ body{overflow-x:hidden}
 <div class="lb-ai-panel"><h4>WHAT SHOULD I EAT NEXT?</h4><div class="lb-insight" id="lb-next-food">AI will identify the biggest nutrition gap after your intake is logged.</div><div class="lb-actions"><button class="lb-btn alt" id="lb-ai-next-meal">AI CHOOSE NEXT MEAL</button><button class="lb-btn alt" id="lb-ai-day-plan">BUILD MY DAY</button></div></div>
 </div>
 <div class="lb-ai-panel" style="margin-top:12px"><h4>PERSONALISED DAILY SNAPSHOT</h4><div class="lb-plan-grid"><div class="lb-plan-cell"><small>ENERGY REMAINING</small><b id="lb-rem-kcal">—</b><div class="lb-ai-mini">estimated</div></div><div class="lb-plan-cell"><small>PROTEIN REMAINING</small><b id="lb-rem-protein">—</b><div class="lb-ai-mini">to target</div></div><div class="lb-plan-cell"><small>FIBRE REMAINING</small><b id="lb-rem-fibre">—</b><div class="lb-ai-mini">to target</div></div></div></div>
-</div>
-<div class="lb-card lb-ai-os" id="food-capture-25">
-<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
-<div><h3 style="margin:0">V25 · AI FOOD CAPTURE 2.0</h3><p class="lb-note" style="margin:5px 0 0">Capture a meal by voice, text or photo. AI interprets it, shows you the estimate, and waits for confirmation before adding it to your diary.</p></div>
-<span class="lb-status" id="lb-v25-status">READY</span>
-</div>
-<div class="lb-ai-os-grid" style="margin-top:14px">
-<div class="lb-ai-panel">
-<h4>CAPTURE</h4>
-<div class="lb-fields">
-<label>MEAL<select id="lb-v25-meal"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option><option>Drink</option></select></label>
-</div>
-<textarea class="lb-ai-capture" id="lb-v25-text" placeholder="Example: chicken breast, rice, mixed vegetables and a small yoghurt" style="width:100%;min-height:110px;box-sizing:border-box"></textarea>
-<div class="lb-actions" style="margin-top:10px"><button class="lb-btn" id="lb-v25-voice">🎙 VOICE</button><button class="lb-btn" id="lb-v25-analyse">ANALYSE TEXT</button><button class="lb-btn alt" id="lb-v25-photo">📷 PHOTO</button><input accept="image/*" capture="environment" hidden="" id="lb-v25-file" type="file"/></div>
-<p class="lb-ai-mini">For packaged foods, nutrition-label information is preferred. Photo analysis is an estimate unless the label is clearly readable.</p>
-</div>
-<div class="lb-ai-panel">
-<h4>AI CAPTURE RULE</h4>
-<div class="lb-insight">Nothing is logged automatically in V25. Review the detected foods and nutrition first, then choose <b>CONFIRM &amp; LOG</b>.</div>
-<div class="lb-ai-mini" id="lb-v25-capture-note" style="margin-top:10px">SOURCE: — · CONFIDENCE: —</div>
-</div>
-</div>
-<div class="lb-ai-panel" hidden="" id="lb-v25-preview" style="margin-top:12px">
-<div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><h4 style="margin:0">REVIEW BEFORE LOGGING</h4><span class="lb-status" id="lb-v25-preview-status">AI ESTIMATE</span></div>
-<div class="lb-scroll" style="margin-top:10px"><table class="lb-table"><thead><tr><th>FOOD</th><th>KCAL</th><th>PROTEIN</th><th>CARBS</th><th>FAT</th><th>FIBRE</th></tr></thead><tbody id="lb-v25-preview-rows"></tbody></table></div>
-<div class="lb-actions" style="margin-top:12px"><button class="lb-btn" id="lb-v25-confirm">CONFIRM &amp; LOG</button><button class="lb-btn alt" id="lb-v25-cancel">CANCEL</button></div>
-</div>
 </div>
 <div class="lb-card">
 <h3>ADD MEASUREMENT</h3><div class="lb-fields">
@@ -1179,6 +1157,14 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
  function save(){localStorage.setItem(KEY,JSON.stringify(db)); if(currentId)localStorage.setItem('leanBlendCurrentProfile',currentId);} window.leanBlendSaveProfile=save;
  function blank(){return {name:'',age:null,gender:'',height:null,target:null,currentWeight:null,activity:'general',trainingDays:0,calorieTarget:null,measurements:[],orders:[],foodLog:[],garmin:{source:'Garmin Connect',importedAt:null,days:[]}};}
  function profile(){
+   // Rehydrate from localStorage on every lookup so profiles created/selected by
+   // another handler are immediately visible to the in-memory profile engine.
+   try{
+     const fresh=JSON.parse(localStorage.getItem(KEY)||'{}')||{};
+     const freshId=localStorage.getItem('leanBlendCurrentProfile')||'';
+     if(JSON.stringify(fresh)!==JSON.stringify(db)) db=fresh;
+     if(freshId && freshId!==currentId) currentId=freshId;
+   }catch(e){}
    if(currentId && db[currentId]) return db[currentId];
    const ids=Object.keys(db);
    if(ids.length){
@@ -1249,6 +1235,16 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
   const esc=x=>String(x??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
   const today=()=>new Date().toISOString().slice(0,10);
   const profile=()=>window.leanBlendProfile?.()||null;
+  // AI functions may be used immediately after the page loads. If no active
+  // profile exists, use the canonical SAVE PROFILE handler once, then re-read
+  // the profile from the profile engine. This avoids stale in-memory state.
+  function ensureAIProfile(){
+    let p=profile();
+    if(p) return p;
+    try{ $('lb-save-profile')?.click(); }catch(e){}
+    p=profile();
+    return p||null;
+  }
   const targets=()=>window.leanBlendTargets?.()||null;
   const foodsToday=()=>window.leanBlendFoodToday?.()||[];
   const endpoint=()=>String(localStorage.getItem(ENDPOINT_KEY)||DEFAULT_ENDPOINT).replace(/\/$/,'');
@@ -1287,9 +1283,9 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
     const method=(r.method||[]).map(x=>`<li>${esc(x)}</li>`).join('');
     aiResult.innerHTML=`<div class="ai-result ai-recipe"><div class="ai-kicker">${esc(r.match_type||'AI FORMULATION')}</div><h3>${esc(r.name||'LEAN BLEND AI')}</h3><p class="ai-intro">${esc(r.summary||'')}</p><div class="ai-badges">${b.kcal!=null?`<span class="ai-badge">~${esc(b.kcal)} kcal</span>`:''}${b.protein_g!=null?`<span class="ai-badge">${esc(b.protein_g)} g protein</span>`:''}${b.fibre_g!=null?`<span class="ai-badge">${esc(b.fibre_g)} g fibre</span>`:''}${b.cost_zar!=null?`<span class="ai-badge">~R${esc(b.cost_zar)} home cost</span>`:''}</div>${r.coach?`<div class="ai-disclaimer"><b>PERSONAL AI COACH</b><br>${esc(r.coach)}</div>`:''}<div class="ai-recipe-grid"><div class="ai-box"><h4>INGREDIENTS · 300 ML TARGET</h4><ul>${ing||'<li>No ingredients returned.</li>'}</ul></div><div class="ai-box"><h4>METHOD / ACTIONS</h4><ul>${method||'<li>No method returned.</li>'}</ul></div></div>${r.notes?`<div class="ai-disclaimer">${esc(r.notes)}</div>`:''}<div class="ai-sources">${Array.isArray(r.sources)&&r.sources.length?'Sources checked: '+r.sources.map(esc).join(' · '):'Nutrition/cost figures are estimates unless sourced from LEAN BLEND data or a named label.'}</div><div class="ai-saving"><button class="ai-save" id="ai-copy-result">COPY RECIPE</button>${b.kcal!=null&&ing?'<button class="ai-save" id="ai-log-result">LOG THIS BLEND</button>':''}</div></div>`;
     $('ai-copy-result')?.addEventListener('click',async()=>{const text=`LEAN BLEND AI — ${r.name}\n\n${(r.ingredients||[]).map(x=>`${x.quantity} ${x.ingredient}`).join('\n')}\n\nMETHOD\n${(r.method||[]).map((x,i)=>`${i+1}. ${x}`).join('\n')}\n\nEstimated: ${b.kcal??'—'} kcal · ${b.protein_g??'—'} g protein · ${b.fibre_g??'—'} g fibre`;await navigator.clipboard?.writeText(text);$('ai-copy-result').textContent='COPIED ✓';setTimeout(()=>$('ai-copy-result').textContent='COPY RECIPE',1200);});
-    $('ai-log-result')?.addEventListener('click',()=>{const p=profile();if(!p){alert('Create a profile first.');return}p.foodLog=p.foodLog||[];p.foodLog.push({date:today(),meal:'Drink',name:r.name||'AI Blend',kcal:Number(b.kcal)||0,protein:Number(b.protein_g)||0,carbs:Number(b.carbs_g)||0,fat:Number(b.fat_g)||0,fibre:Number(b.fibre_g)||0,source:'AI BLEND'});window.leanBlendSaveProfile?.();window.leanBlendRender?.();alert('AI blend logged.');});
+    $('ai-log-result')?.addEventListener('click',()=>{const p=profile();if(!p){alert('Please enter your profile details and save the profile first.');return}p.foodLog=p.foodLog||[];p.foodLog.push({date:today(),meal:'Drink',name:r.name||'AI Blend',kcal:Number(b.kcal)||0,protein:Number(b.protein_g)||0,carbs:Number(b.carbs_g)||0,fat:Number(b.fat_g)||0,fibre:Number(b.fibre_g)||0,source:'AI BLEND'});window.leanBlendSaveProfile?.();window.leanBlendRender?.();alert('AI blend logged.');});
   }
-  async function askAI(prompt){if(!aiPrompt||!aiResult)return;if(!profile()){alert('Create or select a profile first.');return}aiAsk.disabled=true;setStatus('ai-result-status','THINKING…');aiResult.innerHTML='<div class="ai-result-empty"><strong>LEAN BLEND AI is thinking…</strong><p>Using your profile, food log, Garmin context and LEAN BLEND data.</p></div>';try{const d=await aiPost('/blend',{prompt,source:'lean-blend-web',version:'26.0',context});renderBlend(d);setStatus('ai-result-status','PERSONALISED');}catch(e){setStatus('ai-result-status','ERROR');aiResult.innerHTML=`<div class="ai-error"><b>AI connection problem.</b><br>${esc(e.message)}</div>`}finally{aiAsk.disabled=false}}
+  async function askAI(prompt){if(!aiPrompt||!aiResult)return;const aiProfile=ensureAIProfile(); if(!aiProfile){alert('Please enter your profile details and save the profile first.');return}aiAsk.disabled=true;setStatus('ai-result-status','THINKING…');aiResult.innerHTML='<div class="ai-result-empty"><strong>LEAN BLEND AI is thinking…</strong><p>Using your profile, food log, Garmin context and LEAN BLEND data.</p></div>';try{const d=await aiPost('/blend',{prompt,source:'lean-blend-web',version:'26.0',context});renderBlend(d);setStatus('ai-result-status','PERSONALISED');}catch(e){setStatus('ai-result-status','ERROR');aiResult.innerHTML=`<div class="ai-error"><b>AI connection problem.</b><br>${esc(e.message)}</div>`}finally{aiAsk.disabled=false}}
   aiAsk?.addEventListener('click',()=>askAI(aiPrompt.value.trim()));
   window.leanBlendAIReview=()=>runDailyBrief(true);
   // ---- DAILY INTELLIGENCE ----
@@ -1297,7 +1293,7 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
     $('lb-coach-title').textContent=d.headline||'Today’s plan';$('lb-coach-copy').textContent=d.summary||'AI daily brief ready.';
     const pri=Array.isArray(d.priorities)?d.priorities:[];$('lb-coach-priorities').innerHTML=(pri.length?pri:['Keep the next meal aligned with the remaining targets.']).map(x=>'<li>'+esc(x)+'</li>').join('');$('lb-coach-next-text').textContent=d.next_action||'Choose the next meal that best closes today’s biggest gap.';setStatus('lb-coach-status','PERSONALISED');
   }
-  async function runDailyBrief(fromFood=false){if(!profile()){alert('Create or select a profile first.');return}setStatus('lb-coach-status','THINKING…');try{const d=await aiPost('/daily-brief',{context,date:today(),source:fromFood?'FOOD REVIEW':'DAILY COACH'});renderDaily(d);$('lb-ai-coach').innerHTML='<b>AI COACH</b><p>'+esc(d.summary||'AI daily review ready.')+'</p>';}catch(e){setStatus('lb-coach-status','ERROR');alert(e.message)}}
+  async function runDailyBrief(fromFood=false){const aiProfile=ensureAIProfile(); if(!aiProfile){alert('Please enter your profile details and save the profile first.');return}setStatus('lb-coach-status','THINKING…');try{const d=await aiPost('/daily-brief',{context,date:today(),source:fromFood?'FOOD REVIEW':'DAILY COACH'});renderDaily(d);$('lb-ai-coach').innerHTML='<b>AI COACH</b><p>'+esc(d.summary||'AI daily review ready.')+'</p>';}catch(e){setStatus('lb-coach-status','ERROR');alert(e.message)}}
   $('lb-ai-daily-brief')?.addEventListener('click',()=>runDailyBrief(false));
   // ---- NEXT MEAL / BUILD MY DAY: use the meal-plan endpoint, not generic recipe generation ----
   function planPreferences(){return {meals_per_day:Number($('lb-plan-meals')?.value||3),style:$('lb-plan-style')?.value||'balanced',budget:$('lb-plan-budget')?.value||'normal',prefer:$('lb-plan-prefer')?.value.trim()||'',avoid:$('lb-plan-avoid')?.value.trim()||''};}
@@ -1306,7 +1302,7 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
     const days=Array.isArray(d.days)?d.days:[];$('lb-day-grid').innerHTML=days.map((day,i)=>`<article class="lb-day-card"><h4>${esc(day.day||`DAY ${i+1}`)}</h4><div class="lb-day-meta">${day.total_kcal?Math.round(day.total_kcal)+' kcal':''}${day.total_protein_g?' · '+Math.round(day.total_protein_g)+' g protein':''}</div>${(day.meals||[]).map(m=>`<div class="lb-meal-row"><b>${esc(m.meal||'Meal')}</b><span>${esc(m.name||'—')}${m.kcal?' · '+Math.round(m.kcal)+' kcal':''}${m.protein_g?' · P '+Math.round(m.protein_g)+'g':''}</span></div>`).join('')}</article>`).join('')||'<div class="lb-plan-note">No daily plan was returned.</div>';
     $('lb-meal-plan-output').hidden=false;window.leanBlendLastMealPlan=d;
   }
-  async function buildPlan(mode='week',target='planner'){if(!profile()){alert('Create or select a profile first.');return}setStatus('lb-plan-status','THINKING…');try{const prefs=planPreferences();const req=mode==='today'?'Create a today-only plan focused on the next practical meals based on what is already logged today.':'Create a practical 7-day plan.';const d=await aiPost('/meal-plan',{context,mode,preferences:prefs,request:req});renderPlan(d);setStatus('lb-plan-status','PERSONALISED');if(target==='next')renderNextFromPlan(d);if(target==='day')renderDayFromPlan(d);}catch(e){setStatus('lb-plan-status','ERROR');alert(e.message)}}
+  async function buildPlan(mode='week',target='planner'){const aiProfile=ensureAIProfile(); if(!aiProfile){alert('Please enter your profile details and save the profile first.');return}setStatus('lb-plan-status','THINKING…');try{const prefs=planPreferences();const req=mode==='today'?'Create a today-only plan focused on the next practical meals based on what is already logged today.':'Create a practical 7-day plan.';const d=await aiPost('/meal-plan',{context,mode,preferences:prefs,request:req});renderPlan(d);setStatus('lb-plan-status','PERSONALISED');if(target==='next')renderNextFromPlan(d);if(target==='day')renderDayFromPlan(d);}catch(e){setStatus('lb-plan-status','ERROR');alert(e.message)}}
   function renderNextFromPlan(d){const first=(d.days||[]).flatMap(x=>x.meals||[])[0];$('lb-next-food').textContent=first?`${first.name||'Next meal'}${first.kcal?' · '+Math.round(first.kcal)+' kcal':''}${first.protein_g?' · '+Math.round(first.protein_g)+' g protein':''}`:'AI returned no next-meal recommendation.';}
   function renderDayFromPlan(d){const day=(d.days||[])[0];$('lb-next-food').textContent=day?(day.meals||[]).map(m=>`${m.meal||'Meal'}: ${m.name||'—'}`).join(' · '):'AI returned no day plan.';}
   $('lb-ai-coach-next')?.addEventListener('click',()=>buildPlan('today','next'));
@@ -1352,16 +1348,17 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
   // ---- WEEKLY AI ----
   function weeklyLocalStats(period=7){const p=profile();const cutoff=new Date(Date.now()-((period-1)*86400000));const foods=(p?.foodLog||[]).filter(x=>new Date((x.date||'')+'T12:00:00')>=cutoff);const days={};foods.forEach(x=>{days[x.date]??={kcal:0,protein:0,fibre:0};days[x.date].kcal+=Number(x.kcal)||0;days[x.date].protein+=Number(x.protein)||0;days[x.date].fibre+=Number(x.fibre)||0});const avg=a=>{const v=a.map(Number).filter(Number.isFinite);return v.length?v.reduce((x,y)=>x+y,0)/v.length:null};const g=(p?.garmin?.days||[]).filter(x=>new Date(((x.activityDay||x.reportDate)||'')+'T12:00:00')>=cutoff);return {period,foodEntries:foods.length,foodDays:Object.keys(days).length,garminDays:g.length,avgKcal:avg(Object.values(days).map(x=>x.kcal)),avgProtein:avg(Object.values(days).map(x=>x.protein)),avgFibre:avg(Object.values(days).map(x=>x.fibre)),garmin:{steps:avg(g.map(x=>x.steps)),sleep:avg(g.map(x=>x.sleepHours)),stress:avg(g.map(x=>x.avgStress)),battery:avg(g.map(x=>x.bodyBatteryHigh))}}}
   function renderWeeklyLocal(s){const put=(id,v)=>$(id)&&($(id).textContent=v);put('lb-w-protein',s.avgProtein!=null?s.avgProtein.toFixed(1)+' g':'—');put('lb-w-calories',s.avgKcal!=null?Math.round(s.avgKcal)+' kcal':'—');put('lb-w-steps',s.garmin.steps!=null?Math.round(s.garmin.steps).toLocaleString():'—');put('lb-w-sleep',s.garmin.sleep!=null?s.garmin.sleep.toFixed(1)+' h':'—');put('lb-w-stress',s.garmin.stress!=null?Math.round(s.garmin.stress):'—');put('lb-w-battery',s.garmin.battery!=null?Math.round(s.garmin.battery):'—');put('lb-weekly-summary',`${s.foodDays} food days and ${s.garminDays} Garmin days are available in this period.`);}
-  async function runWeekly(planOnly=false){if(!profile()){alert('Create or select a profile first.');return}const period=Number(document.querySelector('.lb-period.active')?.dataset.period||7);setStatus('lb-weekly-status','THINKING…');try{const s=weeklyLocalStats(period);renderWeeklyLocal(s);const d=await aiPost('/weekly-review',{context,period,mode:planOnly?'plan':'review',weekly:s});$('lb-weekly-headline').textContent=d.headline||'Weekly intelligence';$('lb-weekly-summary').textContent=d.summary||$('lb-weekly-summary').textContent;const pri=Array.isArray(d.priorities)?d.priorities:[];$('lb-weekly-priorities').innerHTML=(pri.length?pri:['Keep logging consistently.']).map(x=>'<li>'+esc(x)+'</li>').join('');$('lb-weekly-action').textContent=d.next_7_days_action||d.action_plan||'Use the biggest identified gap to guide the next week.';setStatus('lb-weekly-status','PERSONALISED');}catch(e){setStatus('lb-weekly-status','ERROR');alert(e.message)}}
+  async function runWeekly(planOnly=false){const aiProfile=ensureAIProfile(); if(!aiProfile){alert('Please enter your profile details and save the profile first.');return}const period=Number(document.querySelector('.lb-period.active')?.dataset.period||7);setStatus('lb-weekly-status','THINKING…');try{const s=weeklyLocalStats(period);renderWeeklyLocal(s);const d=await aiPost('/weekly-review',{context,period,mode:planOnly?'plan':'review',weekly:s});$('lb-weekly-headline').textContent=d.headline||'Weekly intelligence';$('lb-weekly-summary').textContent=d.summary||$('lb-weekly-summary').textContent;const pri=Array.isArray(d.priorities)?d.priorities:[];$('lb-weekly-priorities').innerHTML=(pri.length?pri:['Keep logging consistently.']).map(x=>'<li>'+esc(x)+'</li>').join('');$('lb-weekly-action').textContent=d.next_7_days_action||d.action_plan||'Use the biggest identified gap to guide the next week.';setStatus('lb-weekly-status','PERSONALISED');}catch(e){setStatus('lb-weekly-status','ERROR');alert(e.message)}}
   document.querySelectorAll('.lb-period').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.lb-period').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderWeeklyLocal(weeklyLocalStats(Number(b.dataset.period)));}));
   $('lb-ai-weekly-review')?.addEventListener('click',()=>runWeekly(false));$('lb-ai-weekly-plan')?.addEventListener('click',()=>runWeekly(true));renderWeeklyLocal(weeklyLocalStats(7));
   // ---- FOOD CAPTURE 2.0 ----
   let pending=[];
   function meal(){return $('lb-v25-meal')?.value||'Snack';}
   function showFood(d,source){pending=(d.items||[]).map(x=>({date:today(),meal:x.meal||meal(),name:x.name||'Food',kcal:Number(x.kcal)||0,protein:Number(x.protein_g)||0,carbs:Number(x.carbs_g)||0,fat:Number(x.fat_g)||0,fibre:Number(x.fibre_g)||0,source:x.source||source||'AI ESTIMATE',confidence:x.confidence||'MEDIUM'}));$('lb-v25-preview-rows').innerHTML=pending.map((x,i)=>`<tr><td><input data-v26="name" data-i="${i}" value="${esc(x.name)}" style="min-width:150px"></td><td><input data-v26="kcal" data-i="${i}" type="number" value="${x.kcal}" style="width:80px"></td><td><input data-v26="protein" data-i="${i}" type="number" step="0.1" value="${x.protein}" style="width:70px"></td><td><input data-v26="carbs" data-i="${i}" type="number" step="0.1" value="${x.carbs}" style="width:70px"></td><td><input data-v26="fat" data-i="${i}" type="number" step="0.1" value="${x.fat}" style="width:70px"></td><td><input data-v26="fibre" data-i="${i}" type="number" step="0.1" value="${x.fibre}" style="width:70px"></td></tr>`).join('')||'<tr><td colspan="6">No food could be confidently identified.</td></tr>';$('lb-v25-capture-note').textContent='SOURCE: '+pending.map(x=>x.source).join(', ')+' · CONFIDENCE: '+(pending.some(x=>x.confidence==='LOW')?'LOW':pending.some(x=>x.confidence==='MEDIUM')?'MEDIUM':'HIGH');$('lb-v25-preview').hidden=!pending.length;setStatus('lb-v25-status',pending.length?'REVIEW':'NO MATCH');}
-  async function analyseCapture(){if(!profile()){alert('Create or select a profile first.');return}const text=$('lb-v25-text').value.trim();if(!text){alert('Describe the meal first.');return}setStatus('lb-v25-status','ANALYSING…');try{showFood(await aiPost('/food',{prompt:text,meal:meal(),date:today(),context}),'AI ESTIMATE')}catch(e){setStatus('lb-v25-status','ERROR');alert(e.message)}}
-  async function analysePhoto(dataUrl){if(!profile()){alert('Create or select a profile first.');return}setStatus('lb-v25-status','READING PHOTO…');try{showFood(await aiPost('/food-photo',{image:dataUrl,meal:meal(),date:today(),context}),'AI VISION ESTIMATE')}catch(e){setStatus('lb-v25-status','ERROR');alert(e.message)}}
-  $('lb-v25-analyse')?.addEventListener('click',analyseCapture);$('lb-v25-photo')?.addEventListener('click',()=>$('lb-v25-file')?.click());$('lb-v25-file')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=()=>analysePhoto(reader.result);reader.readAsDataURL(f);e.target.value='';});
+  async function analyseCapture(){const aiProfile=ensureAIProfile(); if(!aiProfile){alert('Please enter your profile details and save the profile first.');return}const text=$('lb-v25-text').value.trim();if(!text){alert('Describe the meal first.');return}setStatus('lb-v25-status','ANALYSING…');try{showFood(await aiPost('/food',{prompt:text,meal:meal(),date:today(),context}),'AI ESTIMATE')}catch(e){setStatus('lb-v25-status','ERROR');alert(e.message)}}
+  async function analysePhoto(dataUrl){const aiProfile=ensureAIProfile(); if(!aiProfile){alert('Please enter your profile details and save the profile first.');return}setStatus('lb-v25-status','READING PHOTO…');try{showFood(await aiPost('/food-photo',{image:dataUrl,meal:meal(),date:today(),context}),'AI VISION ESTIMATE')}catch(e){setStatus('lb-v25-status','ERROR');alert(e.message)}}
+  $('lb-v25-analyse')?.addEventListener('click',analyseCapture);$('lb-v25-photo')?.addEventListener('click',()=>$('lb-v25-file')?.click());
+  document.querySelectorAll('.lb-meal-chip').forEach(chip=>chip.addEventListener('click',()=>{document.querySelectorAll('.lb-meal-chip').forEach(x=>x.classList.remove('active'));chip.classList.add('active');const sel=$('lb-v25-meal');if(sel)sel.value=chip.dataset.meal||'Snack';}));$('lb-v25-file')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=()=>analysePhoto(reader.result);reader.readAsDataURL(f);e.target.value='';});
   $('lb-v25-voice')?.addEventListener('click',()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert('Voice input is not supported in this browser. Use text capture instead.');return}const r=new SR();r.lang='en-ZA';r.interimResults=false;r.maxAlternatives=1;r.onstart=()=>setStatus('lb-v25-status','LISTENING…');r.onresult=e=>{$('lb-v25-text').value=e.results[0][0].transcript;setStatus('lb-v25-status','VOICE CAPTURED')};r.onerror=()=>setStatus('lb-v25-status','VOICE ERROR');r.onend=()=>{};r.start();});
   $('lb-v25-preview-rows')?.addEventListener('input',e=>{const el=e.target;if(!el.dataset.v26)return;const i=Number(el.dataset.i),k=el.dataset.v26;if(pending[i])pending[i][k]=k==='name'?el.value:Number(el.value)||0});
   $('lb-v25-confirm')?.addEventListener('click',()=>{const p=profile();if(!p||!pending.length)return;p.foodLog=p.foodLog||[];pending.forEach(x=>p.foodLog.push(x));window.leanBlendSaveProfile?.();pending=[];$('lb-v25-preview').hidden=true;$('lb-v25-text').value='';setStatus('lb-v25-status','LOGGED ✓');window.leanBlendRender?.();setTimeout(()=>setStatus('lb-v25-status','READY'),1500)});
@@ -1382,18 +1379,12 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
   setTimeout(()=>window.leanBlendRefreshAI(),150);
 })();
 </script>
-<script id="lean-blend-v26-1-profile-hardening">
+
+<script id="lean-blend-v27-audit-marker">
 (function(){
-  const DB='leanBlendProfilesV1', CUR='leanBlendCurrentProfile', AI='leanBlendAIEndpoint';
-  const WORKER='https://lean-blend-ai.fdtv2wdbmj.workers.dev';
-  try{
-    const db=JSON.parse(localStorage.getItem(DB)||'{}')||{};
-    let id=localStorage.getItem(CUR)||'';
-    if(!id || !db[id]){
-      const ids=Object.keys(db);
-      if(ids.length){id=ids[0];localStorage.setItem(CUR,id);}
-    }
-    if(!localStorage.getItem(AI)) localStorage.setItem(AI,WORKER);
-  }catch(e){}
+  // V27 unified AI capture: one visible capture surface, one AI pipeline.
+  // This marker is intentionally small and has no business logic.
+  document.documentElement.dataset.leanBlendAiVersion='27';
 })();
-</script></body></html>
+</script>
+</body></html>
