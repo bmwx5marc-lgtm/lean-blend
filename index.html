@@ -1396,4 +1396,90 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
     if(!localStorage.getItem(AI)) localStorage.setItem(AI,WORKER);
   }catch(e){}
 })();
-</script></body></html>
+</script>
+<script id="lean-blend-v26-2-ai-capture-bridge">
+(function(){
+  const $=id=>document.getElementById(id);
+  function getProfile(){
+    try{
+      if(typeof window.leanBlendProfile==='function'){
+        const p=window.leanBlendProfile();
+        if(p) return p;
+      }
+    }catch(e){}
+    return null;
+  }
+  function syncProfileFromForm(){
+    try{
+      const p=getProfile();
+      if(p) return p;
+      const name=($('lb-user-name')?.value||'').trim()||'My Profile';
+      const dbKey='leanBlendProfilesV1';
+      let db={};
+      try{db=JSON.parse(localStorage.getItem(dbKey)||'{}')||{};}catch(e){}
+      let id=localStorage.getItem('leanBlendCurrentProfile')||'';
+      if(!id||!db[id]){
+        id='u_'+Date.now();
+        db[id]={
+          name,
+          age:$('lb-age')?.value?Number($('lb-age').value):null,
+          gender:$('lb-gender')?.value||'',
+          height:$('lb-height')?.value?Number($('lb-height').value):null,
+          target:$('lb-target')?.value?Number($('lb-target').value):null,
+          currentWeight:$('lb-current-weight-input')?.value?Number($('lb-current-weight-input').value):null,
+          activity:$('lb-activity')?.value||'general',
+          trainingDays:$('lb-training-days')?.value?Number($('lb-training-days').value):0,
+          calorieTarget:$('lb-calorie-target')?.value?Number($('lb-calorie-target').value):null,
+          measurements:[],
+          orders:[],
+          foodLog:[],
+          garmin:{source:'Garmin Connect',importedAt:null,days:[]}
+        };
+        if(Number.isFinite(db[id].currentWeight)&&db[id].currentWeight>0){
+          db[id].measurements.push({date:new Date().toISOString().slice(0,10),weight:db[id].currentWeight,fat:'',water:''});
+        }
+        localStorage.setItem(dbKey,JSON.stringify(db));
+        localStorage.setItem('leanBlendCurrentProfile',id);
+        if(typeof window.leanBlendRender==='function') window.leanBlendRender();
+      }
+      return typeof window.leanBlendProfile==='function'?window.leanBlendProfile():db[id];
+    }catch(e){return null;}
+  }
+  function bind(){
+    const btn=$('lb-ai-log-food');
+    const src=$('lb-ai-food-capture');
+    const target=$('lb-v25-text');
+    const analyse=$('lb-v25-analyse');
+    if(!btn||!src)return;
+    if(btn.dataset.v262Bound==='1')return;
+    btn.dataset.v262Bound='1';
+    btn.addEventListener('click',function(){
+      const p=getProfile()||syncProfileFromForm();
+      if(!p){alert('Please save your profile before using AI Food Capture.');return;}
+      const text=src.value.trim();
+      if(!text){alert('Tell LEAN BLEND what you ate first.');return;}
+      if(target){
+        target.value=text;
+        const chip=document.querySelector('.lb-meal-chip.active');
+        const meal=chip?.dataset?.meal||'Snack';
+        const sel=$('lb-v25-meal');
+        if(sel)sel.value=meal;
+      }
+      if(analyse) analyse.click();
+      else alert('AI Food Capture is not connected correctly.');
+    });
+    document.querySelectorAll('.lb-meal-chip').forEach(chip=>{
+      chip.addEventListener('click',()=>{
+        document.querySelectorAll('.lb-meal-chip').forEach(x=>x.classList.remove('active'));
+        chip.classList.add('active');
+        const sel=$('lb-v25-meal');
+        if(sel)sel.value=chip.dataset.meal||'Snack';
+      });
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind);
+  else bind();
+  setTimeout(bind,300);
+})();
+</script>
+</body></html>
