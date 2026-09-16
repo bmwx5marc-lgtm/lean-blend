@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LEAN BLEND — BIGFISH · V25.3 FINAL AI FOOD INTELLIGENCE</title>
+<title>LEAN BLEND — BIGFISH · V25.4 FINAL AI FOOD INTELLIGENCE</title>
 <style>
 :root{--ink:#141513;--muted:#686b63;--paper:#f5f4ef;--line:#dddcd4;--accent:#8ebd70;--dark:#11120f}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#e8e7e0;color:var(--ink);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;line-height:1.5}
@@ -1839,8 +1839,10 @@ Estimated: ${b.kcal??'—'} kcal · ${b.protein_g??'—'} g protein · ${b.fibre
  $('lb-v25-cancel')?.addEventListener('click',()=>{pending=[];$('lb-v25-preview').hidden=true;$('lb-v25-status').textContent='READY';});
 })();
 </script>
-<!-- LEAN BLEND V25.3 PROFILE + AI REPAIR PATCH -->
-<script id="lean-blend-v25-3-repair">
+
+
+<!-- LEAN BLEND V25.4 PROFILE + AI CAPTURE REPAIR -->
+<script id="lean-blend-v25-4-repair">
 (function(){
   const DB_KEY='leanBlendProfilesV1';
   const CUR_KEY='leanBlendCurrentProfile';
@@ -1848,69 +1850,157 @@ Estimated: ${b.kcal??'—'} kcal · ${b.protein_g??'—'} g protein · ${b.fibre
   const DEFAULT_AI='https://lean-blend-ai.fdtv2wdbmj.workers.dev';
 
   function readDB(){
-    try{return JSON.parse(localStorage.getItem(DB_KEY)||'{}')||{};}catch(e){return {};}
-  }
-  function activeId(db){
-    let id=localStorage.getItem(CUR_KEY)||'';
-    if(!id || !db[id]){
-      const ids=Object.keys(db);
-      const recovered=ids[0]||'';
-      if(recovered && recovered!==id){
-        localStorage.setItem(CUR_KEY,recovered);
-        // Let the original profile engine reopen with the recovered ID.
-        if(!sessionStorage.getItem('leanBlendProfileRepairReloaded')){
-          sessionStorage.setItem('leanBlendProfileRepairReloaded','1');
-          location.reload();
-          return recovered;
-        }
-      }
-      id=recovered;
-    }
-    return id;
-  }
-  function activeProfile(){
-    const db=readDB();
-    const id=activeId(db);
-    return id && db[id] ? db[id] : null;
+    try{
+      const x=JSON.parse(localStorage.getItem(DB_KEY)||'{}');
+      return x && typeof x==='object' ? x : {};
+    }catch(e){return {};}
   }
 
-  // Recover the selected profile if the saved profile ID was lost/stale.
+  function readNumber(id){
+    const v=document.getElementById(id)?.value;
+    return v===''||v==null ? null : Number(v);
+  }
+
+  function profileFromForm(){
+    const name=(document.getElementById('lb-user-name')?.value||'').trim();
+    if(!name) return null;
+    return {
+      name,
+      age:readNumber('lb-age'),
+      gender:document.getElementById('lb-gender')?.value||'',
+      height:readNumber('lb-height'),
+      target:readNumber('lb-target'),
+      activity:document.getElementById('lb-activity')?.value||'general',
+      trainingDays:Number(document.getElementById('lb-training-days')?.value||0),
+      calorieTarget:readNumber('lb-calorie-target'),
+      measurements:[],
+      orders:[],
+      foodLog:[],
+      garmin:{source:'Garmin Connect',importedAt:null,days:[]}
+    };
+  }
+
+  function getActiveId(db){
+    let id=localStorage.getItem(CUR_KEY)||'';
+    if(id && db[id]) return id;
+
+    const ids=Object.keys(db);
+    if(ids.length){
+      id=ids[0];
+      localStorage.setItem(CUR_KEY,id);
+      return id;
+    }
+
+    // Last-resort recovery: if the profile form visibly contains a name,
+    // create a real local profile immediately so AI Capture can use it.
+    const formProfile=profileFromForm();
+    if(formProfile){
+      id='u_'+Date.now();
+      db[id]=formProfile;
+      localStorage.setItem(DB_KEY,JSON.stringify(db));
+      localStorage.setItem(CUR_KEY,id);
+      return id;
+    }
+    return '';
+  }
+
+  function activeProfile(){
+    const db=readDB();
+    const id=getActiveId(db);
+    if(!id || !db[id]) return null;
+
+    // Backfill any missing arrays from older LEAN BLEND versions.
+    const p=db[id];
+    if(!Array.isArray(p.measurements))p.measurements=[];
+    if(!Array.isArray(p.orders))p.orders=[];
+    if(!Array.isArray(p.foodLog))p.foodLog=[];
+    if(!p.garmin)p.garmin={source:'Garmin Connect',importedAt:null,days:[]};
+
+    // If the UI contains newer profile values, preserve them in the local DB.
+    const name=(document.getElementById('lb-user-name')?.value||'').trim();
+    if(name && (!p.name || p.name==='Unnamed')){
+      p.name=name;
+      p.age=readNumber('lb-age');
+      p.gender=document.getElementById('lb-gender')?.value||p.gender||'';
+      p.height=readNumber('lb-height');
+      p.target=readNumber('lb-target');
+      p.activity=document.getElementById('lb-activity')?.value||p.activity||'general';
+      p.trainingDays=Number(document.getElementById('lb-training-days')?.value||p.trainingDays||0);
+      p.calorieTarget=readNumber('lb-calorie-target');
+      localStorage.setItem(DB_KEY,JSON.stringify(db));
+    }
+    return p;
+  }
+
   window.leanBlendProfile=function(){
     return activeProfile();
   };
 
-  // Make every save operation persist the currently selected profile reliably.
   window.leanBlendSaveProfile=function(){
     const db=readDB();
-    let id=activeId(db);
+    let id=getActiveId(db);
     if(!id){
-      const name=(document.getElementById('lb-user-name')?.value||'').trim();
-      if(!name) return false;
+      const p=profileFromForm();
+      if(!p) return false;
       id='u_'+Date.now();
-      db[id]={name:name,age:null,gender:'',height:null,target:null,activity:'general',trainingDays:0,calorieTarget:null,measurements:[],orders:[],foodLog:[],garmin:{source:'Garmin Connect',importedAt:null,days:[]}};
-      localStorage.setItem(CUR_KEY,id);
+      db[id]=p;
+    }else{
+      const p=db[id];
+      if(!Array.isArray(p.measurements))p.measurements=[];
+      if(!Array.isArray(p.orders))p.orders=[];
+      if(!Array.isArray(p.foodLog))p.foodLog=[];
+      if(!p.garmin)p.garmin={source:'Garmin Connect',importedAt:null,days:[]};
+
+      const name=(document.getElementById('lb-user-name')?.value||'').trim();
+      if(name)p.name=name;
+      p.age=readNumber('lb-age');
+      p.gender=document.getElementById('lb-gender')?.value||'';
+      p.height=readNumber('lb-height');
+      p.target=readNumber('lb-target');
+      p.activity=document.getElementById('lb-activity')?.value||'general';
+      p.trainingDays=Number(document.getElementById('lb-training-days')?.value||0);
+      p.calorieTarget=readNumber('lb-calorie-target');
     }
     localStorage.setItem(DB_KEY,JSON.stringify(db));
     localStorage.setItem(CUR_KEY,id);
     return true;
   };
 
-  // Keep AI capture usable after a browser/local-storage reset.
-  if(!localStorage.getItem(AI_KEY)) localStorage.setItem(AI_KEY,DEFAULT_AI);
-
-  // If a profile already exists, restore it as the active profile immediately.
-  const p=activeProfile();
-  if(p){
-    try{window.leanBlendRender?.();}catch(e){}
+  // Always restore the known production Worker endpoint if the browser lost it.
+  if(!localStorage.getItem(AI_KEY)){
+    localStorage.setItem(AI_KEY,DEFAULT_AI);
   }
 
-  // Re-check after the page's existing profile script has finished initialising.
-  setTimeout(function(){
-    const p2=activeProfile();
-    if(p2){
-      try{window.leanBlendRender?.();}catch(e){}
+  // Keep the visible profile selector aligned with the recovered profile.
+  function syncProfileUI(){
+    const db=readDB();
+    const id=getActiveId(db);
+    const p=id?db[id]:null;
+    if(!p)return;
+    const sel=document.getElementById('lb-user-select');
+    if(sel){
+      const option=[...sel.options].find(o=>o.value===id);
+      if(option)sel.value=id;
     }
-  },100);
+    const current=document.getElementById('lb-current-profile');
+    if(current)current.textContent=(p.name||'UNNAMED PROFILE').toUpperCase();
+  }
+
+  // Run after the original profile engine has initialised.
+  setTimeout(function(){
+    try{
+      const p=activeProfile();
+      if(p){
+        syncProfileUI();
+        window.leanBlendRender?.();
+      }
+    }catch(e){}
+  },150);
+
+  // Also expose a deterministic diagnostic helper for the app itself.
+  window.leanBlendProfileReady=function(){
+    return !!activeProfile();
+  };
 })();
 </script>
 </body></html>
