@@ -1360,7 +1360,7 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
   function showFood(d,source){pending=(d.items||[]).map(x=>({date:today(),meal:x.meal||meal(),name:x.name||'Food',kcal:Number(x.kcal)||0,protein:Number(x.protein_g)||0,carbs:Number(x.carbs_g)||0,fat:Number(x.fat_g)||0,fibre:Number(x.fibre_g)||0,source:x.source||source||'AI ESTIMATE',confidence:x.confidence||'MEDIUM'}));$('lb-v25-preview-rows').innerHTML=pending.map((x,i)=>`<tr><td><input data-v26="name" data-i="${i}" value="${esc(x.name)}" style="min-width:150px"></td><td><input data-v26="kcal" data-i="${i}" type="number" value="${x.kcal}" style="width:80px"></td><td><input data-v26="protein" data-i="${i}" type="number" step="0.1" value="${x.protein}" style="width:70px"></td><td><input data-v26="carbs" data-i="${i}" type="number" step="0.1" value="${x.carbs}" style="width:70px"></td><td><input data-v26="fat" data-i="${i}" type="number" step="0.1" value="${x.fat}" style="width:70px"></td><td><input data-v26="fibre" data-i="${i}" type="number" step="0.1" value="${x.fibre}" style="width:70px"></td></tr>`).join('')||'<tr><td colspan="6">No food could be confidently identified.</td></tr>';$('lb-v25-capture-note').textContent='SOURCE: '+pending.map(x=>x.source).join(', ')+' · CONFIDENCE: '+(pending.some(x=>x.confidence==='LOW')?'LOW':pending.some(x=>x.confidence==='MEDIUM')?'MEDIUM':'HIGH');$('lb-v25-preview').hidden=!pending.length;setStatus('lb-v25-status',pending.length?'REVIEW':'NO MATCH');}
   async function analyseCapture(){const aiProfile=ensureAIProfile(); if(!aiProfile){return}const text=$('lb-v25-text').value.trim();if(!text){alert('Describe the meal first.');return}setStatus('lb-v25-status','ANALYSING…');try{showFood(await aiPost('/food',{prompt:text,meal:meal(),date:today(),context}),'AI ESTIMATE')}catch(e){setStatus('lb-v25-status','ERROR');alert(e.message)}}
   async function analysePhoto(dataUrl){const aiProfile=ensureAIProfile(); if(!aiProfile){return}setStatus('lb-v25-status','READING PHOTO…');try{showFood(await aiPost('/food-photo',{image:dataUrl,meal:meal(),date:today(),context}),'AI VISION ESTIMATE')}catch(e){setStatus('lb-v25-status','ERROR');alert(e.message)}}
-  window.leanBlendAnalyseCapture=analyseCapture; $('lb-v25-analyse')?.addEventListener('click',analyseCapture); $('lb-v25-photo')?.addEventListener('click',()=>$('lb-v25-file')?.click());
+  $('lb-v25-analyse')?.addEventListener('click',analyseCapture);$('lb-v25-photo')?.addEventListener('click',()=>$('lb-v25-file')?.click());
   document.querySelectorAll('.lb-meal-chip').forEach(chip=>chip.addEventListener('click',()=>{document.querySelectorAll('.lb-meal-chip').forEach(x=>x.classList.remove('active'));chip.classList.add('active');const sel=$('lb-v25-meal');if(sel)sel.value=chip.dataset.meal||'Snack';}));$('lb-v25-file')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=()=>analysePhoto(reader.result);reader.readAsDataURL(f);e.target.value='';});
   $('lb-v25-voice')?.addEventListener('click',()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert('Voice input is not supported in this browser. Use text capture instead.');return}const r=new SR();r.lang='en-ZA';r.interimResults=false;r.maxAlternatives=1;r.onstart=()=>setStatus('lb-v25-status','LISTENING…');r.onresult=e=>{$('lb-v25-text').value=e.results[0][0].transcript;setStatus('lb-v25-status','VOICE CAPTURED')};r.onerror=()=>setStatus('lb-v25-status','VOICE ERROR');r.onend=()=>{};r.start();});
   $('lb-v25-preview-rows')?.addEventListener('input',e=>{const el=e.target;if(!el.dataset.v26)return;const i=Number(el.dataset.i),k=el.dataset.v26;if(pending[i])pending[i][k]=k==='name'?el.value:Number(el.value)||0});
@@ -1388,26 +1388,6 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
   // V27 unified AI capture: one visible capture surface, one AI pipeline.
   // This marker is intentionally small and has no business logic.
   document.documentElement.dataset.leanBlendAiVersion='27.2';
-})();
-</script>
-<script id="lean-blend-v27-3-capture-guard">
-(function(){
-  'use strict';
-  function boot(){
-    const btn=document.getElementById('lb-v25-analyse');
-    if(!btn)return;
-    // Guaranteed visible click path: if the main AI core is loaded, call its
-    // canonical capture function. Otherwise show a diagnostic instead of silently doing nothing.
-    btn.type='button';
-    btn.dataset.aiWired='true';
-    btn.addEventListener('click',function(){
-      if(typeof window.leanBlendAnalyseCapture==='function') return;
-      const status=document.getElementById('lb-v25-status');
-      if(status)status.textContent='AI ENGINE NOT LOADED';
-      alert('LEAN BLEND AI engine did not load. Refresh the page once. If this message remains, the deployed GitHub file is not the V27.3 build.');
-    },true);
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot); else boot();
 })();
 </script>
 </body></html>
