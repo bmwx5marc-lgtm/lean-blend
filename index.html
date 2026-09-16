@@ -1178,7 +1178,33 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
  const today=new Date().toISOString().slice(0,10); $('lb-measure-date').value=today; $('lb-order-date').value=today; $('lb-food-date').value=today;
  function save(){localStorage.setItem(KEY,JSON.stringify(db)); if(currentId)localStorage.setItem('leanBlendCurrentProfile',currentId);} window.leanBlendSaveProfile=save;
  function blank(){return {name:'',age:null,gender:'',height:null,target:null,currentWeight:null,activity:'general',trainingDays:0,calorieTarget:null,measurements:[],orders:[],foodLog:[],garmin:{source:'Garmin Connect',importedAt:null,days:[]}};}
- function profile(){return db[currentId]||null;}
+ function profile(){
+   if(currentId && db[currentId]) return db[currentId];
+   const ids=Object.keys(db);
+   if(ids.length){
+     currentId=ids[0];
+     save();
+     return db[currentId];
+   }
+   const name=($('lb-user-name')?.value||'').trim();
+   if(name){
+     const id='u_'+Date.now();
+     const p=blank();
+     p.name=name;
+     p.age=$('lb-age')?.value?Number($('lb-age').value):null;
+     p.gender=$('lb-gender')?.value||'';
+     p.height=$('lb-height')?.value?Number($('lb-height').value):null;
+     p.target=$('lb-target')?.value?Number($('lb-target').value):null;
+     p.activity=$('lb-activity')?.value||'general';
+     p.trainingDays=$('lb-training-days')?.value?Number($('lb-training-days').value):0;
+     p.calorieTarget=$('lb-calorie-target')?.value?Number($('lb-calorie-target').value):null;
+     const w=$('lb-current-weight-input')?.value?Number($('lb-current-weight-input').value):NaN;
+     if(Number.isFinite(w)&&w>0){p.currentWeight=w;p.measurements.push({date:today,weight:w,fat:'',water:''});}
+     db[id]=p; currentId=id; save(); refreshSelect();
+     return p;
+   }
+   return null;
+ }
  function refreshSelect(){const sel=$('lb-user-select'); sel.innerHTML='<option value="">Select profile…</option>'+Object.entries(db).map(([id,p])=>'<option value="'+id+'">'+esc(p.name||'Unnamed')+'</option>').join(''); sel.value=currentId||'';}
  function setCurrent(id){currentId=id; save(); const p=profile(); if(p&&!p.garmin)p.garmin={source:'Garmin Connect',importedAt:null,days:[]}; $('lb-current-profile').textContent=p?(p.name||'UNNAMED PROFILE').toUpperCase():'NO PROFILE SELECTED'; $('lb-user-name').value=p?.name||''; $('lb-age').value=p?.age??''; $('lb-gender').value=p?.gender||''; $('lb-height').value=p?.height??''; $('lb-target').value=p?.target??''; $('lb-current-weight-input').value=p?.currentWeight??(latest(p)?.weight??''); $('lb-activity').value=p?.activity||'general'; $('lb-training-days').value=p?.trainingDays??0; $('lb-calorie-target').value=p?.calorieTarget??''; render();}
  function esc(x){return String(x??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
@@ -1354,5 +1380,20 @@ document.getElementById('customModal').addEventListener('click',e=>{if(e.target.
   // ---- LOCAL FOOD INTELLIGENCE REFRESH ----
   window.leanBlendRefreshAI=()=>{try{window.leanBlendRender?.();renderGarmin();renderWeeklyLocal(weeklyLocalStats(7))}catch(e){}};
   setTimeout(()=>window.leanBlendRefreshAI(),150);
+})();
+</script>
+<script id="lean-blend-v26-1-profile-hardening">
+(function(){
+  const DB='leanBlendProfilesV1', CUR='leanBlendCurrentProfile', AI='leanBlendAIEndpoint';
+  const WORKER='https://lean-blend-ai.fdtv2wdbmj.workers.dev';
+  try{
+    const db=JSON.parse(localStorage.getItem(DB)||'{}')||{};
+    let id=localStorage.getItem(CUR)||'';
+    if(!id || !db[id]){
+      const ids=Object.keys(db);
+      if(ids.length){id=ids[0];localStorage.setItem(CUR,id);}
+    }
+    if(!localStorage.getItem(AI)) localStorage.setItem(AI,WORKER);
+  }catch(e){}
 })();
 </script></body></html>
